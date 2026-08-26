@@ -1,0 +1,791 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>A Special Surprise for Shami Tr</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- GSAP for smooth animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  
+  <!-- Google Fonts: Outfit for modern, clean typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #05050D;
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #FFFFFF;
+    }
+
+    /* Ambient Background Gradient */
+    .bg-gradient-radial {
+      background: radial-gradient(circle at 50% 50%, #1A1635 0%, #0D0A1C 50%, #040308 100%);
+    }
+
+    /* Candle Flame Animation */
+    .flame-glow {
+      filter: drop-shadow(0 0 12px rgba(255, 180, 50, 0.9)) drop-shadow(0 0 24px rgba(255, 100, 0, 0.6));
+    }
+
+    /* Pendulum Tag Swing */
+    @keyframes pendulumSwing {
+      0% { transform: rotate(-5deg); }
+      50% { transform: rotate(5deg); }
+      100% { transform: rotate(-5deg); }
+    }
+    .animate-pendulum {
+      transform-origin: top center;
+      animation: pendulumSwing 3s ease-in-out infinite;
+    }
+
+    /* Shimmer effect for blade and tag */
+    .shimmer {
+      background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%);
+      background-size: 200% 100%;
+    }
+  </style>
+</head>
+<body class="bg-gradient-radial flex flex-col items-center justify-between min-h-screen text-center p-4 relative select-none">
+
+  <!-- Background Particle Canvas -->
+  <canvas id="particleCanvas" class="absolute inset-0 pointer-events-none z-0"></canvas>
+
+  <!-- Foreground Celebration Particle Canvas -->
+  <canvas id="fxCanvas" class="absolute inset-0 pointer-events-none z-20"></canvas>
+
+  <!-- Flash Overlay for Impacts -->
+  <div id="flashOverlay" class="absolute inset-0 bg-white opacity-0 pointer-events-none z-40 transition-opacity duration-100"></div>
+
+  <!-- Replay Button (Only visible if intro was already played) -->
+  <button id="replayBadge" class="hidden absolute top-4 right-4 z-50 text-xs text-amber-200/60 bg-amber-900/20 border border-amber-500/30 px-3 py-1.5 rounded-full backdrop-blur-md active:scale-95 transition-all">
+    Replay Intro ↺
+  </button>
+
+  <!-- MAIN SCENE CONTAINER -->
+  <main class="relative z-10 w-full h-full flex flex-col items-center justify-center flex-1 max-w-md mx-auto">
+
+    <!-- 1. CAKE CONTAINER (Side view -> Top view transformation) -->
+    <div id="cakeContainer" class="relative w-64 h-64 flex items-center justify-center my-auto cursor-pointer">
+      
+      <!-- Interactive Touch/Hold Zone for Flame -->
+      <div id="touchZone" class="absolute inset-0 z-30 rounded-full flex items-center justify-center"></div>
+
+      <!-- SIDE-VIEW CAKE WRAPPER -->
+      <div id="cakeSideView" class="absolute flex flex-col items-center justify-end w-52 h-44 transition-transform">
+        
+        <!-- Candle & Flame (Positioned on top of side cake) -->
+        <div id="candleGroup" class="relative z-20 flex flex-col items-center -mb-2">
+          <!-- Flame -->
+          <div id="flame" class="relative w-5 h-8 cursor-pointer flex items-center justify-center">
+            <div class="flame-glow w-4 h-7 bg-amber-400 rounded-full blur-[1px] animate-pulse"></div>
+            <div class="absolute w-2 h-4 bg-white rounded-full top-1"></div>
+          </div>
+          <!-- Wick -->
+          <div class="w-0.5 h-2 bg-neutral-700"></div>
+          <!-- Candle Stick -->
+          <div class="w-3 h-10 bg-gradient-to-r from-pink-300 via-rose-100 to-pink-300 rounded-sm shadow-md border-t border-pink-200"></div>
+        </div>
+
+        <!-- Cylindrical Cake Body -->
+        <div id="sideCakeBody" class="relative w-full h-32 rounded-2xl shadow-2xl flex flex-col overflow-hidden bg-gradient-to-b from-amber-100 via-pink-900 to-amber-950 border border-amber-400/30">
+          <!-- Top Cream Layer -->
+          <div class="w-full h-6 bg-amber-50 border-b border-pink-200 flex justify-around items-center px-2">
+            <div class="w-3 h-3 bg-pink-300 rounded-full shadow-inner"></div>
+            <div class="w-3 h-3 bg-pink-300 rounded-full shadow-inner"></div>
+            <div class="w-3 h-3 bg-pink-300 rounded-full shadow-inner"></div>
+            <div class="w-3 h-3 bg-pink-300 rounded-full shadow-inner"></div>
+            <div class="w-3 h-3 bg-pink-300 rounded-full shadow-inner"></div>
+          </div>
+          <!-- Middle Sponge Layer -->
+          <div class="w-full h-8 bg-amber-800/80 my-auto border-y border-amber-600/40 flex items-center justify-center">
+            <div class="w-full h-1 bg-amber-400/30"></div>
+          </div>
+          <!-- Bottom Frosting Base -->
+          <div class="w-full h-5 bg-pink-950 flex justify-around items-end pb-0.5">
+            <div class="w-2 h-2 bg-amber-200/50 rounded-full"></div>
+            <div class="w-2 h-2 bg-amber-200/50 rounded-full"></div>
+            <div class="w-2 h-2 bg-amber-200/50 rounded-full"></div>
+          </div>
+        </div>
+
+        <!-- Shadow under side cake -->
+        <div class="w-48 h-4 bg-black/40 rounded-full blur-sm mt-1"></div>
+      </div>
+
+      <!-- TOP-VIEW CAKE WRAPPER (Hidden initially, transformed into view) -->
+      <div id="cakeTopView" class="absolute w-60 h-60 opacity-0 scale-50 pointer-events-none flex items-center justify-center">
+        <!-- Shadow -->
+        <div class="absolute inset-0 bg-black/50 rounded-full blur-md transform scale-95 translate-y-3"></div>
+
+        <!-- Circular Top Cake SVG with 6 Slices -->
+        <svg id="topCakeSvg" viewBox="0 0 200 200" class="w-full h-full overflow-visible">
+          <defs>
+            <radialGradient id="cakeTopGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#FDF2F8"/>
+              <stop offset="70%" stop-color="#FCE7F3"/>
+              <stop offset="100%" stop-color="#F472B6"/>
+            </radialGradient>
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+          </defs>
+
+          <!-- Group containing all 6 Slices for Radial Animation -->
+          <g id="slicesGroup">
+            <!-- Slice 1 (0° - 60°) -->
+            <path id="slice1" d="M100,100 L190,100 A90,90 0 0,1 145,177.94 Z" fill="url(#cakeTopGrad)" stroke="#DB2777" stroke-width="2" class="origin-center transition-transform"/>
+            <!-- Slice 2 (60° - 120°) -->
+            <path id="slice2" d="M100,100 L145,177.94 A90,90 0 0,1 55,177.94 Z" fill="url(#cakeTopGrad)" stroke="#DB2777" stroke-width="2" class="origin-center transition-transform"/>
+            <!-- Slice 3 (120° - 180°) -->
+            <path id="slice3" d="M100,100 L55,177.94 A90,90 0 0,1 10,100 Z" fill="url(#cakeTopGrad)" stroke="#DB2777" stroke-width="2" class="origin-center transition-transform"/>
+            <!-- Slice 4 (180° - 240°) -->
+            <path id="slice4" d="M100,100 L10,100 A90,90 0 0,1 55,22.06 Z" fill="url(#cakeTopGrad)" stroke="#DB2777" stroke-width="2" class="origin-center transition-transform"/>
+            <!-- Slice 5 (240° - 300°) -->
+            <path id="slice5" d="M100,100 L55,22.06 A90,90 0 0,1 145,22.06 Z" fill="url(#cakeTopGrad)" stroke="#DB2777" stroke-width="2" class="origin-center transition-transform"/>
+            <!-- Slice 6 (300° - 360°) -->
+            <path id="slice6" d="M100,100 L145,22.06 A90,90 0 0,1 190,100 Z" fill="url(#cakeTopGrad)" stroke="#DB2777" stroke-width="2" class="origin-center transition-transform"/>
+          </g>
+
+          <!-- Frosting Cream Drops & Decorative Details -->
+          <circle cx="100" cy="100" r="15" fill="#F472B6" opacity="0.3"/>
+          <g id="creamDecorations">
+            <circle cx="160" cy="100" r="6" fill="#FFF" filter="url(#glow)"/>
+            <circle cx="130" cy="152" r="6" fill="#FFF" filter="url(#glow)"/>
+            <circle cx="70" cy="152" r="6" fill="#FFF" filter="url(#glow)"/>
+            <circle cx="40" cy="100" r="6" fill="#FFF" filter="url(#glow)"/>
+            <circle cx="70" cy="48" r="6" fill="#FFF" filter="url(#glow)"/>
+            <circle cx="130" cy="48" r="6" fill="#FFF" filter="url(#glow)"/>
+          </g>
+        </svg>
+
+        <!-- Cut Lines Layer (Drawn sequentially) -->
+        <svg id="cutLinesSvg" viewBox="0 0 200 200" class="absolute inset-0 w-full h-full pointer-events-none">
+          <line id="cutLine1" x1="100" y1="100" x2="190" y2="100" stroke="#FFF" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="100"/>
+          <line id="cutLine2" x1="100" y1="100" x2="145" y2="177.94" stroke="#FFF" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="100"/>
+          <line id="cutLine3" x1="100" y1="100" x2="55" y2="177.94" stroke="#FFF" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="100"/>
+          <line id="cutLine4" x1="100" y1="100" x2="10" y2="100" stroke="#FFF" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="100"/>
+          <line id="cutLine5" x1="100" y1="100" x2="55" y2="22.06" stroke="#FFF" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="100"/>
+          <line id="cutLine6" x1="100" y1="100" x2="145" y2="22.06" stroke="#FFF" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="100"/>
+        </svg>
+      </div>
+
+      <!-- 2D SVG CAKE KNIFE (Appears in Scene 4) -->
+      <div id="cakeKnife" class="absolute z-30 opacity-0 pointer-events-none transform -translate-y-20 translate-x-24 rotate-45">
+        <svg width="80" height="30" viewBox="0 0 100 30" fill="none">
+          <path d="M0 12 C 20 12, 80 5, 100 2 C 90 20, 30 25, 0 18 Z" fill="url(#knifeBlade)"/>
+          <rect x="0" y="8" width="18" height="12" rx="3" fill="#3B0764"/>
+          <defs>
+            <linearGradient id="knifeBlade" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#E2E8F0"/>
+              <stop offset="50%" stop-color="#FFFFFF"/>
+              <stop offset="100%" stop-color="#94A3B8"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+    </div>
+
+    <!-- 2. GIFT BOX CONTAINER (Scene 7 - Hidden initially) -->
+    <div id="giftContainer" class="absolute w-56 h-56 opacity-0 scale-75 pointer-events-none flex flex-col items-center justify-center my-auto">
+      
+      <!-- Hanging Pendulum Tag -->
+      <div id="giftTag" class="absolute -top-12 z-20 flex flex-col items-center animate-pendulum opacity-0">
+        <div class="w-0.5 h-10 bg-amber-300"></div>
+        <div class="bg-amber-100 text-amber-950 text-xs font-bold px-3 py-1.5 rounded-lg shadow-xl border border-amber-300 flex flex-col items-center">
+          <span class="text-[10px] text-amber-700 tracking-wider">FROM YOUR STUDENTS</span>
+          <div id="studentNamesList" class="flex flex-col gap-0.5 mt-1 text-[11px] font-semibold text-purple-950">
+            <!-- Student names dynamically animated here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 2D Gift Box SVG -->
+      <div id="giftBox" class="relative w-44 h-44 cursor-pointer">
+        <!-- Gift Body -->
+        <div class="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-tr from-purple-900 via-indigo-900 to-purple-800 rounded-2xl border border-amber-400/40 shadow-2xl flex items-center justify-center overflow-hidden">
+          <!-- Ribbon Vertical -->
+          <div class="w-8 h-full bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500 shadow-md"></div>
+          <!-- Ribbon Horizontal -->
+          <div class="absolute w-full h-8 bg-gradient-to-b from-amber-400 via-yellow-200 to-amber-500 shadow-md"></div>
+        </div>
+
+        <!-- Gift Lid -->
+        <div id="giftLid" class="absolute top-6 -inset-x-2 h-12 bg-gradient-to-r from-purple-800 via-indigo-800 to-purple-700 rounded-lg border border-amber-300/50 shadow-lg flex items-center justify-center z-10 origin-bottom transition-transform">
+          <div class="w-8 h-full bg-amber-400"></div>
+          <!-- Bow -->
+          <div class="absolute -top-5 flex items-center justify-center">
+            <div class="w-8 h-6 border-4 border-amber-300 rounded-full transform -rotate-30"></div>
+            <div class="w-8 h-6 border-4 border-amber-300 rounded-full transform rotate-30 -ml-2"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Open Gift Action Button -->
+      <button id="openGiftBtn" class="mt-8 opacity-0 bg-gradient-to-r from-amber-400 to-yellow-500 text-purple-950 font-bold px-8 py-3 rounded-full shadow-lg shadow-amber-500/20 active:scale-95 transition-all text-sm tracking-wider uppercase border border-amber-200">
+        OPEN ME 🎁
+      </button>
+    </div>
+
+    <!-- SUBTITLE TEXT DISPLAY -->
+    <div class="min-h-[60px] flex items-center justify-center px-4 mt-6 z-20">
+      <p id="captionText" class="text-amber-100/90 text-base md:text-lg font-light tracking-wide transition-opacity duration-300">
+        A little surprise for you...
+      </p>
+    </div>
+
+  </main>
+
+  <footer class="relative z-10 pb-6 text-xs text-purple-300/40">
+    Dedicated to Shami Tr
+  </footer>
+
+  <!-- SCRIPT LOGIC -->
+  <script>
+    /* ===================================================================
+       SYNTHESIZED AUDIO SYSTEM (Web Audio API)
+       =================================================================== */
+    class SoundFX {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioCtx();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      // Wind sound when holding flame
+      playWind() {
+        if (!this.ctx) return;
+        const bufSize = this.ctx.sampleRate * 0.5;
+        const buffer = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 400;
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.01, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.15, this.ctx.currentTime + 0.4);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+        noise.start();
+      }
+      // Extinguish puff
+      playExtinguish() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(150, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.3);
+        
+        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.3);
+      }
+      // Slice sound
+      playSlice() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(200, this.ctx.currentTime + 0.1);
+
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.1);
+      }
+      // Magical chime / level sound
+      playChime() {
+        this.init();
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          
+          const now = this.ctx.currentTime + idx * 0.08;
+          gain.gain.setValueAtTime(0, now);
+          gain.gain.linearRampToValueAtTime(0.15, now + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.5);
+        });
+      }
+      // Party Pop burst sound
+      playPop() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(120, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.15);
+
+        gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.15);
+      }
+      // Final Rainbow explosion sequence
+      playClimax() {
+        this.init();
+        this.playPop();
+        setTimeout(() => this.playChime(), 150);
+      }
+    }
+
+    const sfx = new SoundFX();
+
+    /* ===================================================================
+       CANVAS PARTICLE ENGINE (2D Ambient & Celebration Effects)
+       =================================================================== */
+    const bgCanvas = document.getElementById('particleCanvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    const fxCanvas = document.getElementById('fxCanvas');
+    const fxCtx = fxCanvas.getContext('2d');
+
+    let width, height;
+    function resizeCanvas() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      bgCanvas.width = fxCanvas.width = width * Math.min(window.devicePixelRatio, 2);
+      bgCanvas.height = fxCanvas.height = height * Math.min(window.devicePixelRatio, 2);
+      bgCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      fxCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Ambient floating background particles
+    const bgParticles = Array.from({ length: 40 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      size: Math.random() * 2 + 0.5,
+      alpha: Math.random() * 0.5 + 0.2,
+      speedY: -(Math.random() * 0.3 + 0.1)
+    }));
+
+    function renderBg() {
+      bgCtx.clearRect(0, 0, width, height);
+      bgCtx.fillStyle = '#FFF';
+      bgParticles.forEach(p => {
+        p.y += p.speedY;
+        if (p.y < 0) p.y = height;
+        bgCtx.globalAlpha = p.alpha;
+        bgCtx.beginPath();
+        bgCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        bgCtx.fill();
+      });
+      requestAnimationFrame(renderBg);
+    }
+    renderBg();
+
+    // FX Particles for Confetti & Rainbow Explosion
+    let fxParticles = [];
+    function triggerConfetti(count = 60, isRainbow = false) {
+      const colors = isRainbow 
+        ? ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#FFFFFF']
+        : ['#FBBF24', '#F472B6', '#60A5FA', '#34D399', '#FFFFFF'];
+
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = isRainbow ? Math.random() * 12 + 4 : Math.random() * 8 + 2;
+        fxParticles.push({
+          x: width / 2,
+          y: height / 2,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - (isRainbow ? 3 : 1),
+          size: Math.random() * 6 + 3,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: 1,
+          decay: Math.random() * 0.02 + 0.01,
+          gravity: 0.15
+        });
+      }
+    }
+
+    function renderFx() {
+      fxCtx.clearRect(0, 0, width, height);
+      for (let i = fxParticles.length - 1; i >= 0; i--) {
+        const p = fxParticles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += p.gravity;
+        p.alpha -= p.decay;
+
+        if (p.alpha <= 0) {
+          fxParticles.splice(i, 1);
+          continue;
+        }
+
+        fxCtx.globalAlpha = p.alpha;
+        fxCtx.fillStyle = p.color;
+        fxCtx.beginPath();
+        fxCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        fxCtx.fill();
+      }
+      requestAnimationFrame(renderFx);
+    }
+    renderFx();
+
+    /* ===================================================================
+       STATE & SCENE SEQUENCE CONTROLLER
+       =================================================================== */
+    const students = [
+      "Krushad Naik", "Tej Khobarekar", "Shivam Naik",
+      "Atharva Potfode", "Tejam Barde", "Aizaan Dodamani"
+    ];
+
+    const captionEl = document.getElementById('captionText');
+    const touchZone = document.getElementById('touchZone');
+    const flameEl = document.getElementById('flame');
+    const candleGroup = document.getElementById('candleGroup');
+    const sideCake = document.getElementById('cakeSideView');
+    const topCake = document.getElementById('cakeTopView');
+    const knifeEl = document.getElementById('cakeKnife');
+    const flashEl = document.getElementById('flashOverlay');
+    const giftContainer = document.getElementById('giftContainer');
+    const giftTag = document.getElementById('giftTag');
+    const openGiftBtn = document.getElementById('openGiftBtn');
+    const giftLid = document.getElementById('giftLid');
+    const replayBadge = document.getElementById('replayBadge');
+
+    // Check if user already saw intro
+    if (localStorage.getItem("introComplete") === "true") {
+      replayBadge.classList.remove('hidden');
+    }
+    replayBadge.addEventListener('click', () => {
+      localStorage.removeItem("introComplete");
+      window.location.reload();
+    });
+
+    function setCaption(text) {
+      gsap.to(captionEl, { opacity: 0, duration: 0.2, onComplete: () => {
+        captionEl.textContent = text;
+        gsap.to(captionEl, { opacity: 1, duration: 0.3 });
+      }});
+    }
+
+    function haptic(pattern) {
+      if ('vibrate' in navigator) {
+        try { navigator.vibrate(pattern); } catch(e){}
+      }
+    }
+
+    /* SCENE 1 & 2: PRESS & HOLD TO BLOW CANDLE */
+    let holdTimer = null;
+    let holdProgress = 0;
+
+    setTimeout(() => {
+      setCaption("Press & hold to blow the candle 🕯️");
+    }, 1200);
+
+    function startHold(e) {
+      e.preventDefault();
+      sfx.init();
+      holdProgress = 0;
+      haptic(15);
+      sfx.playWind();
+
+      gsap.to(flameEl, { scale: 1.2, duration: 0.3 });
+
+      holdTimer = setInterval(() => {
+        holdProgress += 100;
+        
+        if (holdProgress === 300) {
+          gsap.to(flameEl, { rotate: -15, scale: 0.8, duration: 0.3 });
+        } else if (holdProgress === 700) {
+          gsap.to(flameEl, { scale: 0.4, opacity: 0.7, duration: 0.3 });
+          haptic(15);
+        } else if (holdProgress >= 1100) {
+          endHoldSuccess();
+        }
+      }, 100);
+    }
+
+    function cancelHold() {
+      if (holdTimer) {
+        clearInterval(holdTimer);
+        holdTimer = null;
+        gsap.to(flameEl, { scale: 1, rotate: 0, opacity: 1, duration: 0.3 });
+      }
+    }
+
+    function endHoldSuccess() {
+      clearInterval(holdTimer);
+      holdTimer = null;
+      touchZone.style.pointerEvents = 'none';
+
+      // Extinguish candle
+      sfx.playExtinguish();
+      haptic([20, 25, 40]);
+      gsap.to(flameEl, { opacity: 0, scale: 0, duration: 0.2 });
+
+      setCaption("Perfect.");
+
+      // SCENE 3: REMOVE CANDLE THEN TRANSFORM SIDE TO TOP VIEW
+      setTimeout(() => {
+        gsap.to(candleGroup, { opacity: 0, y: -10, duration: 0.5, onComplete: transformCakeView });
+      }, 500);
+    }
+
+    touchZone.addEventListener('pointerdown', startHold);
+    touchZone.addEventListener('pointerup', cancelHold);
+    touchZone.addEventListener('pointerleave', cancelHold);
+
+    /* SCENE 4: TRANSFORM SIDE-VIEW TO TOP-VIEW */
+    function transformCakeView() {
+      // Smooth 2D rotation & perspective tilt transformation
+      gsap.to(sideCake, {
+        scaleY: 0.1,
+        scaleX: 1.1,
+        opacity: 0,
+        duration: 1.2,
+        ease: "power3.inOut"
+      });
+
+      gsap.to(topCake, {
+        opacity: 1,
+        scale: 1,
+        duration: 1.3,
+        ease: "power3.inOut",
+        onComplete: setupKnifeCut
+      });
+
+      setTimeout(() => {
+        setCaption("One more cut...");
+      }, 600);
+    }
+
+    /* SCENE 5 & 6: KNIFE APPEARS AND 6 SEQUENTIAL CUTS */
+    function setupKnifeCut() {
+      setCaption("Tap to cut the cake 🔪");
+      knifeEl.style.pointerEvents = 'auto';
+
+      gsap.to(knifeEl, { opacity: 1, y: 0, x: 0, duration: 0.8, ease: "back.out(1.2)" });
+
+      const cakeClickTarget = document.getElementById('cakeContainer');
+      cakeClickTarget.addEventListener('click', startSequentialCuts, { once: true });
+    }
+
+    function startSequentialCuts() {
+      knifeEl.style.pointerEvents = 'none';
+      haptic(15);
+      
+      const lines = [
+        document.getElementById('cutLine1'),
+        document.getElementById('cutLine2'),
+        document.getElementById('cutLine3'),
+        document.getElementById('cutLine4'),
+        document.getElementById('cutLine5'),
+        document.getElementById('cutLine6')
+      ];
+
+      let cutIndex = 0;
+
+      function performNextCut() {
+        if (cutIndex < 6) {
+          sfx.playSlice();
+          haptic(18);
+
+          // Animate cut line SVG draw
+          gsap.to(lines[cutIndex], { strokeDashoffset: 0, duration: 0.4 });
+          
+          // Animate Knife slash angle
+          const angle = cutIndex * 60;
+          gsap.to(knifeEl, {
+            rotate: angle + 45,
+            duration: 0.3,
+            ease: "power2.out"
+          });
+
+          cutIndex++;
+          setTimeout(performNextCut, 650);
+        } else {
+          // All 6 cuts finished
+          gsap.to(knifeEl, { opacity: 0, scale: 0.5, duration: 0.4 });
+          setTimeout(revealSlicesAndParty, 400);
+        }
+      }
+
+      performNextCut();
+    }
+
+    /* SCENE 7: REVEAL 6 SLICES & PARTY POPPER */
+    function revealSlicesAndParty() {
+      // Slightly move out all 6 slices radially
+      const sliceRotations = [-2, -1, 1, 2, 1, -1];
+      for (let i = 1; i <= 6; i++) {
+        const slice = document.getElementById(`slice${i}`);
+        const angleRad = (i * 60 - 30) * (Math.PI / 180);
+        const tx = Math.cos(angleRad) * 12;
+        const ty = Math.sin(angleRad) * 12;
+
+        gsap.to(slice, {
+          x: tx,
+          y: ty,
+          rotate: sliceRotations[i - 1],
+          duration: 0.8,
+          ease: "back.out(1.5)"
+        });
+      }
+
+      // Flash & Confetti Party Burst
+      flashEl.style.opacity = '0.8';
+      setTimeout(() => flashEl.style.opacity = '0', 100);
+
+      sfx.playPop();
+      haptic([30, 20, 45, 20, 60]);
+      triggerConfetti(70);
+
+      setCaption("Six pieces... for six students!");
+
+      // Reassemble slices after celebration
+      setTimeout(reassembleCake, 1800);
+    }
+
+    /* SCENE 8: REASSEMBLE CAKE & TRANSITION TO GIFT */
+    function reassembleCake() {
+      for (let i = 1; i <= 6; i++) {
+        const slice = document.getElementById(`slice${i}`);
+        gsap.to(slice, { x: 0, y: 0, rotate: 0, duration: 1.0, ease: "back.out(1.3)" });
+      }
+
+      setCaption("...but one big surprise.");
+
+      setTimeout(() => {
+        gsap.to(topCake, { scale: 0, opacity: 0, duration: 0.8, ease: "power2.in" });
+        setTimeout(showGiftScene, 600);
+      }, 1200);
+    }
+
+    /* SCENE 9: GIFT BOX APPEARS WITH PENDULUM TAG & NAMES */
+    function showGiftScene() {
+      document.getElementById('cakeContainer').style.display = 'none';
+      giftContainer.classList.remove('pointer-events-none');
+
+      gsap.to(giftContainer, { opacity: 1, scale: 1, duration: 1.0, ease: "back.out(1.2)" });
+      gsap.to(giftTag, { opacity: 1, duration: 0.8, delay: 0.4 });
+      gsap.to(openGiftBtn, { opacity: 1, y: 0, duration: 0.6, delay: 0.8 });
+
+      setCaption("We have something for you...");
+
+      // Sequentially reveal student names on tag
+      const namesContainer = document.getElementById('studentNamesList');
+      students.forEach((name, idx) => {
+        setTimeout(() => {
+          const tagSpan = document.createElement('span');
+          tagSpan.textContent = name;
+          tagSpan.className = "opacity-0 transform translate-y-2 transition-all duration-300";
+          namesContainer.appendChild(tagSpan);
+
+          setTimeout(() => {
+            tagSpan.classList.remove('opacity-0', 'translate-y-2');
+          }, 50);
+        }, idx * 350);
+      });
+
+      // Bind Open Gift Interaction
+      openGiftBtn.addEventListener('click', openGiftBox);
+      document.getElementById('giftBox').addEventListener('click', openGiftBox);
+    }
+
+    /* SCENE 10 & 11: OPEN GIFT, RAINBOW EXPLOSION & HOME TRANSITION */
+    let giftOpened = false;
+    function openGiftBox() {
+      if (giftOpened) return;
+      giftOpened = true;
+
+      haptic(20);
+      
+      // Shake Box
+      gsap.to('#giftBox', { x: -6, duration: 0.08, repeat: 5, yoyo: true, onComplete: () => {
+        gsap.to('#giftBox', { x: 0 });
+        
+        // Lift Lid
+        gsap.to(giftLid, { rotate: -110, x: -30, y: -40, duration: 0.7, ease: "power2.out" });
+        haptic([30, 20, 50, 20, 70]);
+        sfx.playClimax();
+
+        // Massive Rainbow Explosion
+        triggerConfetti(120, true);
+
+        // Bright Rainbow Screen Sweep & Flash
+        setTimeout(() => {
+          flashEl.style.transition = 'opacity 1.2s ease-in-out';
+          flashEl.style.opacity = '1';
+
+          setCaption("Your surprise awaits...");
+
+          // Transition to Home Page
+          setTimeout(navigateToHome, 1500);
+        }, 600);
+      }});
+    }
+
+    function navigateToHome() {
+      localStorage.setItem("introComplete", "true");
+      
+      try {
+        // Direct clean navigation to home.html
+        window.location.href = "home.html";
+      } catch (e) {
+        // Fallback if running inside isolated iframe preview environment
+        document.body.innerHTML = `
+          <div class="flex flex-col items-center justify-center min-h-screen text-center p-6 bg-slate-950 text-amber-100">
+            <h1 class="text-3xl font-bold mb-4">Happy Birthday Shami Tr! 🎉</h1>
+            <p class="text-lg opacity-80 mb-6">Your interactive surprise is unlocked!</p>
+            <a href="home.html" class="bg-amber-400 text-slate-950 font-bold px-6 py-3 rounded-full text-sm uppercase tracking-wider shadow-lg">Enter Home Page ➔</a>
+          </div>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>
