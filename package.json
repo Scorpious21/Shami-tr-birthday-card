@@ -1,0 +1,9 @@
+{
+  "name": "shamitrbirthdaycard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shami-tr-birthday-card",
+  "scripts": {
+    "build": "echo 'No build step required for this static site'"
+  }
+}
