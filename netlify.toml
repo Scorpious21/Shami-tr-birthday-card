@@ -1,21 +1,8 @@
 # Netlify Configuration File (netlify.toml)
 
 [build]
-  # Directory that contains the deploy-ready HTML/CSS/JS assets
-  publish = "dist"
-
-  # Default build command
-  command = "npm run build"
-
-[build.environment]
-  # Specify Node.js version
-  NODE_VERSION = "20"
-
-# SPA Routing: Redirect all traffic to index.html for client-side routers (React, Vue, Vue Router, etc.)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+  # This is a static HTML site with no build step; publish the repo root as-is
+  publish = "."
 
 # Custom Headers for Security and Caching
 [[headers]]
